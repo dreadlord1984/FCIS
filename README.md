@@ -52,10 +52,10 @@ If you find FCIS useful in your research, please consider citing:
 |:---------------------------------:|:----------------:|:--------------:|:-----------:|:-----------:|:--------:|
 | FCIS, ResNet-v1-101             | VOC 2012 train | VOC 2012 val | 66.0      | 51.9      |   0.23s    |
 
-|                                 | <sub>training data</sub> | <sub>testing data</sub>  | <sub>mAP</sub>  | <sub>mAP@0.5</sub> | <sub>mAP@0.75</sub>| <sub>mAP@S</sub> | <sub>mAP@M</sub> | <sub>mAP@L</sub> |
+|                                 | <sub>training data</sub> | <sub>testing data</sub>  | <sub>mAP^r</sub>  | <sub>mAP^r@0.5</sub> | <sub>mAP^r@0.75</sub>| <sub>mAP^r@S</sub> | <sub>mAP^r@M</sub> | <sub>mAP^r@L</sub> |
 |:---------------------------------:|:---------------:|:---------------:|:------:|:---------:|:---------:|:-------:|:-------:|:-------:|
-| <sub>FCIS, ResNet-v1-101, OHEM </sub> | <sub>coco trainval35k</sub> | <sub>coco minival</sub> | 28.7 | 50.5 | 28.8 | 7.7 | 31.0 | 50.1 |
-| <sub>FCIS, ResNet-v1-101, OHEM </sub> | <sub>coco trainval35k</sub> | <sub>coco test-dev</sub>| 29.0 | 51.2 | 29.5 | 7.7 | 30.6 | 48.9 |
+| <sub>FCIS, ResNet-v1-101, OHEM </sub> | <sub>coco trainval35k</sub> | <sub>coco minival</sub> | 29.2 | 50.8 | 29.7 | 7.9 | 31.4 | 51.1 |
+| <sub>FCIS, ResNet-v1-101, OHEM </sub> | <sub>coco trainval35k</sub> | <sub>coco test-dev</sub>| 29.6 | 51.4 | 30.2 | 8.0 | 31.0 | 49.7 |
 
 *Running time is counted on a single Maxwell Titan X GPU (mini-batch size is 1 in inference).*
 
@@ -79,18 +79,41 @@ Any NVIDIA GPUs with at least 5GB memory should be OK
 
 ### Installation
 
-1. Clone the FCIS repository
+1. Clone the FCIS repository, and we'll call the directory that you cloned FCIS as ${FCIS_ROOT}.
 ~~~
 git clone https://github.com/msracver/FCIS.git
 ~~~
 2. For Windows users, run ``cmd .\init.bat``. For Linux user, run `sh ./init.sh`. The scripts will build cython module automatically and create some folders.
-3. Copy operators in `./fcis/operator_cxx` to `$(YOUR_MXNET_FOLDER)/src/operator/contrib` and recompile MXNet.
-4. Please install MXNet following the official guide of MXNet. For advanced users, you may put your Python packge into `./external/mxnet/$(YOUR_MXNET_PACKAGE)`, and modify `MXNET_VERSION` in `./experiments/fcis/cfgs/*.yaml` to `$(YOUR_MXNET_PACKAGE)`. Thus you can switch among different versions of MXNet quickly.
 
+3. Install MXNet:
+
+	3.1 Clone MXNet and checkout to [MXNet@(commit 62ecb60)](https://github.com/dmlc/mxnet/tree/62ecb60) by
+	```
+	git clone --recursive https://github.com/dmlc/mxnet.git
+	git checkout 62ecb60
+	git submodule update
+	```
+	3.2 Copy operators in `$(FCIS_ROOT)/fcis/operator_cxx` to `$(YOUR_MXNET_FOLDER)/src/operator/contrib` by
+	```
+	cp -r $(FCIS_ROOT)/fcis/operator_cxx/* $(MXNET_ROOT)/src/operator/contrib/
+	```
+	3.3 Compile MXNet
+	```
+	cd ${MXNET_ROOT}
+	make -j $(nproc) USE_OPENCV=1 USE_BLAS=openblas USE_CUDA=1 USE_CUDA_PATH=/usr/local/cuda USE_CUDNN=1
+	```
+	3.4 Install the MXNet Python binding by
+	
+	***Note: If you will actively switch between different versions of MXNet, please follow 3.5 instead of 3.4***
+	```
+	cd python
+	sudo python setup.py install
+	```
+	3.5 For advanced users, you may put your Python packge into `./external/mxnet/$(YOUR_MXNET_PACKAGE)`, and modify `MXNET_VERSION` in `./experiments/fcis/cfgs/*.yaml` to `$(YOUR_MXNET_PACKAGE)`. Thus you can switch among different versions of MXNet quickly.
 
 ### Demo
 
-1. To run the demo with our trained model (on COCO trainval35k), please download the model manually from [OneDrive](https://1drv.ms/u/s!Am-5JzdW2XHzhqMJZmVOEDgfde8_tg), and put it under folder `model/`.
+1. To run the demo with our trained model (on COCO trainval35k), please download the model manually from [OneDrive](https://1drv.ms/u/s!Am-5JzdW2XHzhqMJZmVOEDgfde8_tg) (Chinese users can also get it from [BaiduYun](https://pan.baidu.com/s/1geOHioV) with code `tmd4`), and put it under folder `model/`.
 
 	Make sure it looks like this:
 	```
